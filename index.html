@@ -79,7 +79,6 @@
         
         .room-code-box { background: rgba(0, 242, 254, 0.1); border: 2px dashed var(--primary-neon); padding: 15px; border-radius: 12px; text-align: center; margin: 15px 0; }
         .code-display { font-size: 24px; font-weight: 800; letter-spacing: 3px; color: #facc15; margin: 10px 0; }
-        .timer-badge { font-size: 18px; font-weight: bold; color: #facc15; background: rgba(0,0,0,0.6); padding: 8px 16px; border-radius: 20px; display: inline-block; margin: 10px 0; border: 1px solid #facc15; }
 
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 9999; padding: 20px; }
         .modal-card { background: #1e293b; border: 2px solid var(--primary-neon); border-radius: 16px; padding: 20px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 0 25px rgba(0, 242, 254, 0.4); }
@@ -116,7 +115,7 @@
     <!-- 📢 নোটিফিকেশন পপ-আপ মোডাল -->
     <div id="noticeModal" class="modal-overlay hidden">
         <div class="modal-card">
-            <h3 style="color: var(--primary-neon); margin-bottom: 10px;">📢 অ্যাডমিন নোটিফিকেশন</h3>
+            <h3 style="color: var(--primary-neon); margin-bottom: 10px;">📢 নোটিফিকেশন</h3>
             <p id="noticeModalText" style="font-size: 14px; margin-bottom: 20px; color: #fff; line-height: 1.5;"></p>
             <button class="btn btn-green" onclick="closeNoticeModal()">ঠিক আছে</button>
         </div>
@@ -174,14 +173,11 @@
                     <h3 style="color: var(--primary-neon);" id="gameMatchTitle">ম্যাচ রুম</h3>
                     <p style="font-size: 12px; color: var(--text-muted);" id="matchSubtitle">প্লেয়ার ২ জন পূর্ণ হওয়ার অপেক্ষা করা হচ্ছে...</p>
 
-                    <div id="timerContainer" class="hidden">
-                        <div class="timer-badge">⏳ অটো রুম কোড তৈরি হতে বাকি: <span id="timerDisplay">01:00</span></div>
-                    </div>
-
+                    <!-- 📋 রুম কোড দেখার সেকশন -->
                     <div id="roomCodeSection" class="hidden">
                         <div class="room-code-box">
-                            <p style="font-size: 12px; color: #fff;">🔔 আপনার অটো জেনারেটেড লুডু রুম কোড:</p>
-                            <div class="code-display" id="roomCodeVal">00000000</div>
+                            <p style="font-size: 12px; color: #fff;">🔔 অ্যাডমিনের দেওয়া অফিশিয়াল লুডু রুম কোড:</p>
+                            <div class="code-display" id="roomCodeVal">--------</div>
                             <button class="btn btn-green" style="margin-bottom:0;" onclick="copyRoomCode()">📋 রুম কোড কপি করুন</button>
                         </div>
 
@@ -273,6 +269,13 @@
                     <h3 style="color: var(--accent-red); text-align: center;">👑 অ্যাডমিন কন্ট্রোল প্যানেল</h3>
                 </div>
 
+                <!-- 🎲 রুম কোড দেওয়ার সেকশন (অ্যাডমিনের জন্য) -->
+                <div class="card" style="border: 2px solid #facc15;">
+                    <h4 style="color: #facc15;">🎲 পেন্ডিং রুম কোড সাবমিট করুন</h4>
+                    <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">যেসব ম্যাচে ২ জন ফুল হয়ে গেছে, সেগুলোর জন্য লুডু কিং থেকে কোড নিয়ে ইনপুট দিন:</p>
+                    <div id="adminRoomCodeContainer"><p style="font-size: 11px; color: var(--text-muted);">লোড হচ্ছে...</p></div>
+                </div>
+
                 <!-- 🏆 পেন্ডিং উইনার রিকোয়েস্ট (অ্যাডমিন সেকশন) -->
                 <div class="card">
                     <h4 style="color: var(--accent-green);">🏆 পেন্ডিং উইনার রিকোয়েস্ট</h4>
@@ -325,7 +328,6 @@
     <script>
         let currentUser = null;
         let currentActiveMatchId = null;
-        let countdownTimer = null;
         let matchUnsub = null;
         let activeMatchData = null;
         let hasNotified = false;
@@ -352,10 +354,6 @@
             }
             listenToAdminNotifications();
         });
-
-        function generate8DigitRoomCode() {
-            return Math.floor(10000000 + Math.random() * 90000000).toString();
-        }
 
         function listenToAdminNotifications() {
             db.collection("settings").doc("global_notification").onSnapshot(doc => {
@@ -572,7 +570,6 @@
                 let m = doc.data();
                 if(!m) {
                     document.getElementById("matchSubtitle").innerText = "এই ম্যাচটি সমাপ্ত বা আর কার্যকর নেই।";
-                    document.getElementById("timerContainer").classList.add("hidden");
                     document.getElementById("roomCodeSection").classList.add("hidden");
                     return;
                 }
@@ -581,69 +578,34 @@
                 let joined = m.joinedPlayers || [];
 
                 if(joined.length === 2) {
-                    document.getElementById("matchSubtitle").innerText = "২ জন প্লেয়ার যুক্ত হয়েছেন! ১ মিনিট পর অটোমেটিক রুম কোড তৈরি হবে।";
-                    
-                    if(!m.timerStartTime) {
-                        let startTime = Date.now();
-                        await db.collection("matches").doc("match_" + mId).update({ timerStartTime: startTime });
-                    } else {
-                        runCountdown(m.timerStartTime, mId, joined);
-                    }
-
                     if(m.roomCode) {
-                        document.getElementById("timerContainer").classList.add("hidden");
+                        document.getElementById("matchSubtitle").innerText = "২ জন প্লেয়ার যুক্ত হয়েছেন! অফিশিয়াল রুম কোড নিচে দেওয়া হলো।";
                         document.getElementById("roomCodeSection").classList.remove("hidden");
                         document.getElementById("roomCodeVal").innerText = m.roomCode;
 
                         if(!hasNotified) {
                             hasNotified = true;
-                            alert(`🔔 নোটিফিকেশন: আপনার ৮ ডিজিটের অটো লুডু কিং রুম কোড তৈরি হয়েছে!\nরুম কোড: ${m.roomCode}\nকোড কপি করে লুডু কিং এ ঢুকুন।`);
+                            alert(`🔔 অ্যাডমিন রুম কোড দিয়েছেন!\nকোড: ${m.roomCode}\nকপি করে লুডু কিং-এ ঢুকুন।`);
                         }
                     } else {
+                        document.getElementById("matchSubtitle").innerText = "২ জন প্লেয়ার পূর্ণ হয়েছে! অ্যাডমিন কিছুক্ষণের মধ্যে রুম কোড দেবেন...";
                         document.getElementById("roomCodeSection").classList.add("hidden");
                     }
                 } else {
                     document.getElementById("matchSubtitle").innerText = "অপোনেন্ট প্লেয়ারের জন্য অপেক্ষা করা হচ্ছে...";
-                    document.getElementById("timerContainer").classList.add("hidden");
                     document.getElementById("roomCodeSection").classList.add("hidden");
                 }
             });
         }
 
-        function runCountdown(startTime, mId, joined) {
-            if(countdownTimer) clearInterval(countdownTimer);
-            document.getElementById("timerContainer").classList.remove("hidden");
-
-            countdownTimer = setInterval(async () => {
-                let now = Date.now();
-                let elapsed = Math.floor((now - startTime) / 1000);
-                let remaining = 60 - elapsed;
-
-                if(remaining <= 0) {
-                    clearInterval(countdownTimer);
-                    document.getElementById("timerDisplay").innerText = "00:00";
-
-                    if(joined[0] === currentUser.phone && (!activeMatchData || !activeMatchData.roomCode)) {
-                        let generatedCode = generate8DigitRoomCode();
-                        await db.collection("matches").doc("match_" + mId).update({ roomCode: generatedCode });
-                    }
-                    return;
-                }
-
-                let secs = remaining < 10 ? '0' + remaining : remaining;
-                document.getElementById("timerDisplay").innerText = `00:${secs}`;
-            }, 1000);
-        }
-
         function copyRoomCode() {
             let code = document.getElementById("roomCodeVal").innerText;
-            if(!code || code === "00000000") return alert("রুম কোড এখনো প্রস্তুত হয়নি!");
+            if(!code || code === "--------") return alert("রুম কোড এখনো প্রদেয় হয়নি!");
 
             navigator.clipboard.writeText(code);
             alert("রুম কোড কপি হয়েছে: " + code);
         }
 
-        // 📩 নতুন উইন মেসেজ সাবমিট করা
         async function submitWinNotice() {
             let mId = document.getElementById("winMatchIdInput").value.trim();
             if(!mId) return alert("ম্যাচ নম্বর বা আইডি লিখুন!");
@@ -728,7 +690,31 @@
         }
 
         function loadAdminData() {
-            // 🏆 পেন্ডিং উইনার লিস্ট লোড করা
+            // 🎲 অ্যাডমিনের জন্য রুম কোড দেওয়ার সেকশন
+            db.collection("matches").onSnapshot(snap => {
+                let html = "";
+                snap.forEach(doc => {
+                    let m = doc.data();
+                    let mId = doc.id.replace("match_", "");
+                    let joined = m.joinedPlayers || [];
+
+                    if(joined.length === 2) {
+                        html += `
+                            <div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; margin-bottom:10px; border:1px solid var(--accent-orange);">
+                                <strong>ম্যাচ #${mId} (${m.title})</strong><br>
+                                <small>প্লেয়ার ১: ${joined[0]} | প্লেয়ার ২: ${joined[1]}</small><br>
+                                <span style="color:#facc15; font-size:11px;">বর্তমান কোড: ${m.roomCode || 'দেওয়া হয়নি'}</span>
+                                <div style="display:flex; gap:5px; margin-top:8px;">
+                                    <input type="text" id="adminCodeInput_${mId}" placeholder="লুডু রুম কোড লিখুন" style="padding:6px; font-size:12px;">
+                                    <button class="btn btn-green" style="padding:6px 12px; font-size:11px; margin-bottom:0; width:auto;" onclick="submitCodeByAdmin('${mId}')">সেভ</button>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+                document.getElementById("adminRoomCodeContainer").innerHTML = html || "<p style='font-size:11px; color:var(--text-muted);'>বর্তমানে কোনো ম্যাচে ২ জন প্লেয়ার ফুল নেই</p>";
+            });
+
             db.collection("win_claims").where("status", "==", "pending").onSnapshot(snap => {
                 let html = "";
                 snap.forEach(doc => {
@@ -789,7 +775,14 @@
             });
         }
 
-        // 🏆 অ্যাডমিন উইনার রিকোয়েস্ট এপ্রুভ করা
+        async function submitCodeByAdmin(mId) {
+            let code = document.getElementById("adminCodeInput_" + mId).value.trim();
+            if(!code) return alert("রুম কোড লিখুন!");
+
+            await db.collection("matches").doc("match_" + mId).update({ roomCode: code });
+            alert("রুম কোড সফলভাবে যুক্ত করা হয়েছে! প্লেয়াররা এটি পেয়ে যাবে।");
+        }
+
         async function approveWinnerClaim(claimId, phone, prize, matchId) {
             if(confirm(`আপনি কি নিশ্চিত যে এই প্লেয়ারকে বিজয়ী হিসেবে ৳${prize} প্রদান করতে চান?`)) {
                 let uDoc = await db.collection("users").doc(phone).get();
@@ -798,7 +791,6 @@
                     await db.collection("users").doc(phone).update({ winningBalance: curWin + prize });
                     await db.collection("win_claims").doc(claimId).update({ status: "approved" });
                     
-                    // ম্যাচটি সম্পন্ন হওয়ায় ডাটাবেজ থেকে মুছে ফেলা
                     await db.collection("matches").doc("match_" + matchId).delete();
 
                     alert(`সাফল্যের সাথে ৳${prize} প্লেয়ারের ওয়ালেটে যোগ করা হয়েছে এবং ম্যাচটি সমাপ্ত করা হয়েছে!`);
