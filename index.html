@@ -1,837 +1,482 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>rsn-gaming-tournament</title>
+    <title>RSN Gaming - Ludo Tournament</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --bg-main: #0b0f19;
-            --bg-card: rgba(22, 31, 49, 0.85);
-            --border-card: rgba(56, 189, 248, 0.2);
-            --primary-neon: #00f2fe;
-            --secondary-neon: #4facfe;
-            --accent-green: #00e676;
-            --accent-red: #ff2a6d;
-            --accent-orange: #ff9f43;
-            --text-main: #f1f5f9;
-            --text-muted: #94a3b8;
+            --primary: #6c5ce7;
+            --secondary: #a29bfe;
+            --accent: #fdcb6e;
+            --success: #00b894;
+            --danger: #d63031;
+            --bg: #0f0c20;
+            --card-bg: #1e1b38;
+            --text: #ffffff;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: var(--bg-main); color: var(--text-main); padding-bottom: 80px; min-height: 100vh; }
-        
-        .top-notice-bar {
-            background: linear-gradient(90deg, #1e3c72 0%, #2a5298 100%);
-            color: #ffffff; font-size: 13px; font-weight: 600; padding: 10px 0;
-            position: sticky; top: 0; z-index: 999; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            border-bottom: 1px solid var(--primary-neon);
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        .main-content { padding: 15px; max-width: 600px; margin: 0 auto; }
-        
-        .card, .auth-container { 
-            background: var(--bg-card); backdrop-filter: blur(10px); padding: 20px; 
-            border-radius: 16px; margin-bottom: 15px; border: 1px solid var(--border-card); 
-            box-shadow: 0 8px 24px rgba(0,0,0,0.4); position: relative;
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            padding-bottom: 30px;
         }
 
-        .card.joined-highlight {
-            border: 2px solid var(--accent-green) !important;
-            box-shadow: 0 0 15px rgba(0, 230, 118, 0.3) !important;
-            background: rgba(16, 44, 38, 0.85);
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 15px;
         }
 
-        .joined-badge {
-            position: absolute; top: 12px; right: 12px; background: var(--accent-green);
-            color: #000; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 12px;
+        /* Banner Style */
+        .hero-banner {
+            background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%);
+            border-radius: 15px;
+            padding: 25px 20px;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(255, 8, 68, 0.3);
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
         }
 
-        .auth-container { max-width: 400px; margin: 40px auto; }
-        .auth-tabs { display: flex; gap: 10px; margin-bottom: 20px; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 10px; }
-        .tab-btn { flex: 1; padding: 10px; background: transparent; color: var(--text-muted); border: none; cursor: pointer; border-radius: 8px; font-weight: bold; }
-        .tab-btn.active { background: linear-gradient(135deg, var(--secondary-neon), var(--primary-neon)); color: #000; }
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.1);
+            transform: rotate(45deg);
+            pointer-events: none;
+        }
 
-        .header { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #1e293b, #0f172a); padding: 15px 20px; border-radius: 16px; margin-bottom: 20px; border: 1px solid var(--border-card); }
-        .brand-title { font-size: 18px; font-weight: 800; background: linear-gradient(to right, var(--primary-neon), #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        
-        .balance-box { background: linear-gradient(135deg, #11998e, var(--accent-green)); color: #000; padding: 8px 16px; border-radius: 30px; font-weight: 800; font-size: 15px; }
+        .hero-banner h1 {
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
 
-        .section-page { display: none; }
-        .active-page { display: block; }
-        
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px); display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid var(--border-card); z-index: 1000; }
-        .nav-item { color: var(--text-muted); text-decoration: none; font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
-        .nav-item.active { color: var(--primary-neon); font-weight: bold; }
+        .hero-banner p {
+            font-size: 14px;
+            opacity: 0.95;
+            margin-bottom: 15px;
+        }
 
-        .form-group { margin-bottom: 14px; }
-        label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 6px; font-weight: 600; }
-        select, input, textarea { width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border-card); color: white; border-radius: 8px; outline: none; }
-        
-        .btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; text-decoration: none; margin-bottom: 10px; font-size: 14px; }
-        .btn-blue { background: linear-gradient(135deg, #00c6ff, #0072ff); color: white; }
-        .btn-green { background: linear-gradient(135deg, #11998e, #38ef7d); color: #000; }
-        .btn-red { background: linear-gradient(135deg, #ff416c, #ff4b2b); color: white; }
-        .btn-orange { background: linear-gradient(135deg, #ff9966, #ff5e62); color: white; }
-        .btn-purple { background: linear-gradient(135deg, #8A2387, #E94057); color: #fff; }
+        .badge-refer {
+            display: inline-block;
+            background: #fff;
+            color: #ff0844;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 13px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
 
-        .hidden { display: none !important; }
-        
-        .room-code-box { background: rgba(0, 242, 254, 0.1); border: 2px dashed var(--primary-neon); padding: 15px; border-radius: 12px; text-align: center; margin: 15px 0; }
-        .code-display { font-size: 24px; font-weight: 800; letter-spacing: 3px; color: #facc15; margin: 10px 0; }
+        /* User Profile & Dashboard */
+        .dashboard-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 9999; padding: 20px; }
-        .modal-card { background: #1e293b; border: 2px solid var(--primary-neon); border-radius: 16px; padding: 20px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 0 25px rgba(0, 242, 254, 0.4); }
+        .balance-box {
+            text-align: center;
+            flex: 1;
+        }
 
-        .user-item { background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-card); border-radius: 10px; padding: 10px; margin-bottom: 10px; font-size: 12px; }
-        .user-actions { display: flex; gap: 5px; margin-top: 8px; flex-wrap: wrap; }
-        .user-actions button { flex: 1; min-width: 70px; padding: 6px; font-size: 10px; }
-        
-        .profile-info { text-align: center; margin-bottom: 20px; }
-        .profile-avatar { width: 70px; height: 70px; background: linear-gradient(135deg, var(--secondary-neon), var(--primary-neon)); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 30px; margin: 0 auto 10px; color: #000; font-weight: bold; }
-        
-        .referral-box { background: rgba(0, 242, 254, 0.1); border: 1px dashed var(--primary-neon); padding: 12px; border-radius: 10px; margin-top: 15px; text-align: left; }
-        .notice-info-text { font-size: 12px; color: var(--accent-orange); margin-bottom: 10px; font-weight: bold; }
+        .balance-box h4 {
+            font-size: 12px;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+
+        .balance-box span {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        /* Navigation Tabs */
+        .tab-nav {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            background: var(--card-bg);
+            border: none;
+            color: #fff;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Cards & Forms */
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 13px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: #141226;
+            color: #fff;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            background: var(--primary);
+            color: #fff;
+            transition: 0.2s;
+        }
+
+        .btn-success { background: var(--success); }
+        .btn-warning { background: var(--accent); color: #000; }
+
+        /* Leaderboard Table */
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .leaderboard-table th, .leaderboard-table td {
+            padding: 10px;
+            text-align: left;
+            font-size: 13px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .leaderboard-table th {
+            color: var(--secondary);
+        }
+
+        .rank-1 { color: #ffd700; font-weight: bold; }
+        .rank-2 { color: #c0c0c0; font-weight: bold; }
+        .rank-3 { color: #cd7f32; font-weight: bold; }
+
     </style>
-
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script>
-      const firebaseConfig = {
-        apiKey: "AIzaSyAMwEgBvJOF-sBbmLpCzzZNCmdg3_V08AU",
-        authDomain: "rrnn-74770.firebaseapp.com",
-        databaseURL: "https://rrnn-74770-default-rtdb.firebaseio.com",
-        projectId: "rrnn-74770",
-        storageBucket: "rrnn-74770.firebasestorage.app",
-        messagingSenderId: "593848649076",
-        appId: "1:593848649076:web:244e26f516dbe7d05a5821"
-      };
-      firebase.initializeApp(firebaseConfig);
-      const db = firebase.firestore();
-    </script>
 </head>
 <body>
 
-    <!-- 📢 নোটিফিকেশন পপ-আপ মোডাল -->
-    <div id="noticeModal" class="modal-overlay hidden">
-        <div class="modal-card">
-            <h3 style="color: var(--primary-neon); margin-bottom: 10px;">📢 নোটিফিকেশন</h3>
-            <p id="noticeModalText" style="font-size: 14px; margin-bottom: 20px; color: #fff; line-height: 1.5;"></p>
-            <button class="btn btn-green" onclick="closeNoticeModal()">ঠিক আছে</button>
+<div class="container">
+
+    <!-- Attractive Banner -->
+    <div class="hero-banner">
+        <h1>RSN LUDO TOURNAMENT</h1>
+        <p>লুডু খেলে টাকা জিতুন প্রতিদিন হাজার টাকা!</p>
+        <span class="badge-refer"><i class="fas fa-gift"></i> প্রতি রেফারে সাথে সাথে ১০ টাকা বোনাস!</span>
+    </div>
+
+    <!-- User Dashboard Header -->
+    <div class="dashboard-card">
+        <div class="balance-box">
+            <h4>উইনিং ব্যালেন্স</h4>
+            <span>৳ <span id="winningBalance">0</span></span>
+        </div>
+        <div style="border-right: 1px solid rgba(255,255,255,0.1); height: 30px;"></div>
+        <div class="balance-box">
+            <h4>রেফার ব্যালেন্স</h4>
+            <span>৳ <span id="referBalance">0</span></span>
+        </div>
+        <div style="border-right: 1px solid rgba(255,255,255,0.1); height: 30px;"></div>
+        <div class="balance-box">
+            <h4>মোট রেফার</h4>
+            <span id="totalRefers">0</span> জন
         </div>
     </div>
 
-    <div class="top-notice-bar">
-        <marquee behavior="scroll" direction="left" scrollamount="5" id="marqueeNoticeBar">
-            📢 সাপোর্ট হোয়াটসঅ্যাপ: 01946886450
-        </marquee>
+    <!-- Navigation -->
+    <div class="tab-nav">
+        <button class="tab-btn active" onclick="switchTab('matches')"><i class="fas fa-gamepad"></i> ম্যাচসমূহ</button>
+        <button class="tab-btn" onclick="switchTab('leaderboard')"><i class="fas fa-trophy"></i> লিডারবোর্ড</button>
+        <button class="tab-btn" onclick="switchTab('withdraw')"><i class="fas fa-wallet"></i> উইথড্র</button>
+        <button class="tab-btn" onclick="switchTab('refer')"><i class="fas fa-user-plus"></i> রেফার</button>
     </div>
 
-    <div class="main-content">
-        <!-- Auth Section -->
-        <div id="authSection" class="auth-container">
-            <h2 class="brand-title" style="text-align: center; margin-bottom: 20px;">rsn-gaming-tournament</h2>
-            <div class="auth-tabs">
-                <button class="tab-btn active" id="btnLoginTab" onclick="switchAuthTab('login')">লগইন</button>
-                <button class="tab-btn" id="btnRegTab" onclick="switchAuthTab('reg')">রেজিস্ট্রেশন</button>
+    <!-- Matches Tab -->
+    <div id="matches" class="tab-content active">
+        <div class="card">
+            <h3>Ludo Classic - 1vs1 Match</h3>
+            <p style="font-size: 12px; color: #aaa; margin-top: 4px;">এন্ট্রি ফি: ৳৫০ | উইনিং প্রাইজ: ৳৯০</p>
+            <br>
+            <div id="playerStatus" style="font-size: 13px; margin-bottom: 10px; color: var(--accent);">
+                প্লেয়ার সংযুক্ত আছে: <span id="playerCount">0</span>/2
             </div>
+            <button class="btn btn-success" onclick="joinMatch()">ম্যাচে জয়েন করুন (৳৫০)</button>
+        </div>
+    </div>
 
-            <form id="loginForm" onsubmit="handleAuth(event, 'login')">
-                <div class="form-group"><label>মোবাইল নম্বর</label><input type="text" id="loginPhone" placeholder="017XXXXXXXX" required></div>
-                <div class="form-group"><label>পাসওয়ার্ড</label><input type="password" id="loginPass" placeholder="******" required></div>
-                <button type="submit" class="btn btn-blue">প্রবেশ করুন</button>
+    <!-- Leaderboard Tab -->
+    <div id="leaderboard" class="tab-content">
+        <div class="card">
+            <h3><i class="fas fa-crown" style="color: var(--accent);"></i> সেরা প্লেয়ার রেঙ্ক</h3>
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>#রেঙ্ক</th>
+                        <th>প্লেয়ার</th>
+                        <th>মোট জয়</th>
+                        <th>রেফার</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboardBody">
+                    <tr>
+                        <td class="rank-1">১</td>
+                        <td>Sojib Khan</td>
+                        <td>৳ ১২৫০</td>
+                        <td>১৫ জন</td>
+                    </tr>
+                    <tr>
+                        <td class="rank-2">২</td>
+                        <td>Rakib Gaming</td>
+                        <td>৳ ৯০০</td>
+                        <td>১০ জন</td>
+                    </tr>
+                    <tr>
+                        <td class="rank-3">৩</td>
+                        <td>Arian Hossain</td>
+                        <td>৳ ৫০০</td>
+                        <td>৬ জন</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Withdraw Tab -->
+    <div id="withdraw" class="tab-content">
+        <div class="card">
+            <h3>উইথড্র রিকোয়েস্ট</h3>
+            <p style="font-size: 12px; color: #aaa; margin-bottom: 15px;">উত্তোলনের জন্য ধরণ নির্বাচন করুন</p>
+            
+            <form onsubmit="handleWithdraw(event)">
+                <div class="form-group">
+                    <label>ব্যালেন্স টাইপ</label>
+                    <select id="withdrawType" class="form-control" onchange="updateMinLimit()">
+                        <option value="refer">রেফার ব্যালেন্স (সর্বনিম্ন ৫০ টাকা)</option>
+                        <option value="winning">উইনিং ব্যালেন্স (সর্বনিম্ন ২০০ টাকা)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>পেমেন্ট মেথড</label>
+                    <select class="form-control" required>
+                        <option>bKash Personal</option>
+                        <option>Nagad Personal</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>মোবাইল নম্বর</label>
+                    <input type="text" class="form-control" placeholder="017xxxxxxxx" required>
+                </div>
+                <div class="form-group">
+                    <label>টাকার পরিমাণ (<span id="minAmountLabel">সর্বনিম্ন ৫০ টাকা</span>)</label>
+                    <input type="number" id="withdrawAmount" class="form-control" placeholder="পরিমাণ লিখুন" required>
+                </div>
+                <button type="submit" class="btn btn-warning">উইথড্র সাবমিট করুন</button>
             </form>
-
-            <form id="regForm" class="hidden" onsubmit="handleAuth(event, 'reg')">
-                <div class="form-group"><label>আপনার নাম</label><input type="text" id="regName" placeholder="আপনার নাম" required></div>
-                <div class="form-group"><label>মোবাইল নম্বর</label><input type="text" id="regPhone" placeholder="017XXXXXXXX" required></div>
-                <div class="form-group"><label>নতুন পাসওয়ার্ড</label><input type="password" id="regPass" placeholder="******" required></div>
-                <div class="form-group"><label>রেফারেল কোড (ঐচ্ছিক)</label><input type="text" id="regReferral" placeholder="রেফারার মোবাইল নম্বর"></div>
-                <button type="submit" class="btn btn-blue">অ্যাকাউন্ট খুলুন</button>
-            </form>
-        </div>
-
-        <!-- App Section -->
-        <div id="appSection" class="hidden">
-            <div class="header">
-                <div>
-                    <h3 class="brand-title">rsn-gaming-tournament</h3>
-                    <small id="userNameDisplay" style="color: var(--text-muted); font-size: 11px;"></small>
-                </div>
-                <div class="balance-box">💰 ৳ <span id="currentBalance">0</span></div>
-            </div>
-
-            <!-- Home Page -->
-            <div id="homePage" class="section-page active-page">
-                <h4 style="margin-bottom: 12px;">🎮 টুর্নামেন্ট ম্যাচসমূহ</h4>
-                <div id="matchContainer"><p style="font-size: 12px; color: var(--text-muted); text-align: center;">ম্যাচ লোড হচ্ছে...</p></div>
-            </div>
-
-            <!-- Match Arena / Room Code Page -->
-            <div id="gameArenaPage" class="section-page">
-                <div class="card" style="text-align: center;">
-                    <h3 style="color: var(--primary-neon);" id="gameMatchTitle">ম্যাচ রুম</h3>
-                    <p style="font-size: 12px; color: var(--text-muted);" id="matchSubtitle">প্লেয়ার ২ জন পূর্ণ হওয়ার অপেক্ষা করা হচ্ছে...</p>
-
-                    <!-- 📋 রুম কোড দেখার সেকশন -->
-                    <div id="roomCodeSection" class="hidden">
-                        <div class="room-code-box">
-                            <p style="font-size: 12px; color: #fff;">🔔 অ্যাডমিনের দেওয়া অফিশিয়াল লুডু রুম কোড:</p>
-                            <div class="code-display" id="roomCodeVal">--------</div>
-                            <button class="btn btn-green" style="margin-bottom:0;" onclick="copyRoomCode()">📋 রুম কোড কপি করুন</button>
-                        </div>
-
-                        <a href="intent://#Intent;scheme=ludoking;package=com.ludo.king;end" class="btn btn-orange" style="margin-top:10px;">👑 লুডু কিং অ্যাপ ওপেন করুন</a>
-                    </div>
-
-                    <!-- 🏆 উইনার মেসেজ অপশন -->
-                    <div class="card style-card" style="margin-top:20px; background:rgba(0,0,0,0.3); text-align:left;">
-                        <h4 style="color: var(--accent-green); margin-bottom:10px; text-align:center;">🏆 খেলা শেষে বিজয়ী হলে অ্যাডমিনকে জানান</h4>
-                        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px; text-align:center;">গেম শেষ হলে আপনার ম্যাচের আইডি দিয়ে অ্যাডমিনকে জানান। অ্যাডমিন ভেরিফাই করে প্রাইজ মানি যুক্ত করবেন।</p>
-                        
-                        <div class="form-group">
-                            <label>ম্যাচ নম্বর / আইডি</label>
-                            <input type="text" id="winMatchIdInput" placeholder="যেমন: 1234">
-                        </div>
-                        <button class="btn btn-green" onclick="submitWinNotice()">📩 অ্যাডমিনকে উইন মেসেজ পাঠান</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Wallet Page -->
-            <div id="walletPage" class="section-page">
-                <div class="card">
-                    <h4 style="text-align: center; color: var(--primary-neon);">💼 ওয়ালেট ও লেনদেন</h4>
-                    <p style="margin-top: 10px;">ডিপোজিট ব্যালেন্স: ৳<span id="depBalanceDisplay">0</span></p>
-                    <p>উইনিং ব্যালেন্স: ৳<span id="winBalanceDisplay">0</span></p>
-                </div>
-
-                <div class="card">
-                    <h4>💳 টাকা জমা দিন (Deposit)</h4>
-                    <p class="notice-info-text">bKash (Personal): 01946886450 (শুধুমাত্র সেন্ড মানি করবেন)</p>
-                    <div class="form-group"><input type="number" id="depAmount" placeholder="টাকার পরিমাণ"></div>
-                    <div class="form-group">
-                        <select id="depMethod">
-                            <option value="bKash">bKash</option>
-                            <option value="Nagad">Nagad</option>
-                        </select>
-                    </div>
-                    <div class="form-group"><input type="text" id="depTrx" placeholder="TrxID (ট্রানজেকশন আইডি)"></div>
-                    <button class="btn btn-green" onclick="submitDeposit()">ডিপোজিট রিকোয়েস্ট পাঠান</button>
-                </div>
-
-                <div class="card">
-                    <h4>🏧 টাকা উত্তোলন করুন (Withdraw)</h4>
-                    <p class="notice-info-text">⚠️ সর্বনিম্ন উত্তোলন ২০০ টাকা</p>
-                    <div class="form-group"><input type="number" id="withAmount" placeholder="উত্তোলনের পরিমাণ (সর্বনিম্ন ২০০ টাকা)"></div>
-                    <div class="form-group">
-                        <select id="withMethod">
-                            <option value="bKash">bKash</option>
-                            <option value="Nagad">Nagad</option>
-                        </select>
-                    </div>
-                    <div class="form-group"><input type="text" id="withNumber" placeholder="আপনার মোবাইল নম্বর"></div>
-                    <button class="btn btn-orange" onclick="submitWithdraw()">উইথড্র রিকোয়েস্ট পাঠান</button>
-                </div>
-
-                <div class="card">
-                    <h4>🔄 ব্যালেন্স ট্রান্সফার</h4>
-                    <div class="form-group"><input type="number" id="trAmount" placeholder="উইনিং থেকে ডিপোজিটে আনার পরিমাণ"></div>
-                    <button class="btn btn-purple" onclick="transferBalance()">ডিপোজিটে নিয়ে যান</button>
-                </div>
-            </div>
-
-            <!-- Profile Page -->
-            <div id="profilePage" class="section-page">
-                <div class="card">
-                    <div class="profile-info">
-                        <div class="profile-avatar" id="avatarInitial">U</div>
-                        <h3 id="profNameDisplay" style="color: var(--primary-neon);">ইউজার নাম</h3>
-                        <p id="profPhoneDisplay" style="font-size: 12px; color: var(--text-muted);">017XXXXXXXX</p>
-                    </div>
-
-                    <div class="referral-box">
-                        <h5 style="color: var(--primary-neon); margin-bottom: 5px;">🎁 রেফার করুন ও ২০ টাকা আয় করুন!</h5>
-                        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">আপনার বন্ধুদের আপনার লিংকে রেজিস্ট্রেশন করালেই পাবেন ২০ টাকা ইনস্ট্যান্ট ডিপোজিট বোনাস!</p>
-                        <input type="text" id="referralLinkInput" readonly style="font-size:11px; padding:8px; margin-bottom:8px;">
-                        <button class="btn btn-green" style="padding:8px; font-size:12px;" onclick="copyReferralLink()">📋 রেফার লিংক কপি করুন</button>
-                    </div>
-
-                    <div style="margin-top: 20px;">
-                        <button class="btn btn-red" onclick="handleLogout()">🚪 লগআউট করুন</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Admin Page -->
-            <div id="adminPage" class="section-page">
-                <div class="card">
-                    <h3 style="color: var(--accent-red); text-align: center;">👑 অ্যাডমিন কন্ট্রোল প্যানেল</h3>
-                </div>
-
-                <!-- 🎲 রুম কোড দেওয়ার সেকশন (অ্যাডমিনের জন্য) -->
-                <div class="card" style="border: 2px solid #facc15;">
-                    <h4 style="color: #facc15;">🎲 পেন্ডিং রুম কোড সাবমিট করুন</h4>
-                    <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">যেসব ম্যাচে ২ জন ফুল হয়ে গেছে, সেগুলোর জন্য লুডু কিং থেকে কোড নিয়ে ইনপুট দিন:</p>
-                    <div id="adminRoomCodeContainer"><p style="font-size: 11px; color: var(--text-muted);">লোড হচ্ছে...</p></div>
-                </div>
-
-                <!-- 🏆 পেন্ডিং উইনার রিকোয়েস্ট (অ্যাডমিন সেকশন) -->
-                <div class="card">
-                    <h4 style="color: var(--accent-green);">🏆 পেন্ডিং উইনার রিকোয়েস্ট</h4>
-                    <div id="winNoticeContainer"><p style="font-size: 11px; color: var(--text-muted);">লোড হচ্ছে...</p></div>
-                </div>
-
-                <div class="card">
-                    <h4 style="color: var(--primary-neon);">📢 সব প্লেয়ারকে নোটিফিকেশন পাঠান</h4>
-                    <div class="form-group">
-                        <textarea id="adminNotificationText" rows="3" placeholder="মেসেজ লিখুন..."></textarea>
-                    </div>
-                    <button class="btn btn-purple" onclick="sendGlobalNotification()">🚀 নোটিফিকেশন সেন্ড করুন</button>
-                </div>
-
-                <div class="card">
-                    <h4>➕ নতুন ম্যাচ তৈরি করুন</h4>
-                    <div class="form-group"><input type="text" id="adminMatchTitle" placeholder="ম্যাচের নাম (যেমন: Ludo Match #1)"></div>
-                    <div class="form-group"><input type="number" id="adminEntryFee" placeholder="এন্ট্রি ফি (টাকা)"></div>
-                    <div class="form-group"><input type="number" id="adminPrize" placeholder="প্রাইজ মানি (টাকা)"></div>
-                    <button class="btn btn-blue" onclick="createMatchByAdmin()">ম্যাচ পাবলিশ করুন</button>
-                </div>
-
-                <div class="card">
-                    <h4>📥 পেন্ডিং ডিপোজিট রিকোয়েস্ট</h4>
-                    <div id="depRequestContainer"><p style="font-size: 11px; color: var(--text-muted);">লোড হচ্ছে...</p></div>
-                </div>
-
-                <div class="card">
-                    <h4>📤 পেন্ডিং উইথড্র রিকোয়েস্ট</h4>
-                    <div id="withRequestContainer"><p style="font-size: 11px; color: var(--text-muted);">লোড হচ্ছে...</p></div>
-                </div>
-
-                <div class="card">
-                    <h4>👥 ইউজার ম্যানেজমেন্ট</h4>
-                    <div id="userManageContainer"><p style="font-size: 11px; color: var(--text-muted);">লোড হচ্ছে...</p></div>
-                </div>
-            </div>
-
-            <!-- Bottom Navigation Bar -->
-            <div class="bottom-nav">
-                <div class="nav-item active" id="navHome" onclick="switchPage('homePage', 'navHome')"><span>🏠</span><span>হোম</span></div>
-                <div class="nav-item" id="navGame" onclick="switchPage('gameArenaPage', 'navGame')"><span>🎮</span><span>গেম এরিনা</span></div>
-                <div class="nav-item" id="navWallet" onclick="switchPage('walletPage', 'navWallet')"><span>💼</span><span>ওয়ালেট</span></div>
-                <div class="nav-item" id="navProfile" onclick="switchPage('profilePage', 'navProfile')"><span>👤</span><span>প্রোফাইল</span></div>
-                <div class="nav-item hidden" id="navAdmin" onclick="switchPage('adminPage', 'navAdmin')"><span>👑</span><span>অ্যাডমিন</span></div>
-            </div>
         </div>
     </div>
 
-    <script>
-        let currentUser = null;
-        let currentActiveMatchId = null;
-        let matchUnsub = null;
-        let activeMatchData = null;
-        let hasNotified = false;
-        let lastSeenNoticeId = null;
-        const ADMIN_PHONE = "01946886450";
+    <!-- Refer Tab -->
+    <div id="refer" class="tab-content">
+        <div class="card">
+            <h3>আপনার রেফারেল লিংক</h3>
+            <p style="font-size: 12px; color: #aaa; margin: 8px 0;">আপনার এই লিংক শেয়ার করে যে কেউ সাইটে যোগ দিলে আপনি সাথে সাথে পাবেন ১০ টাকা!</p>
+            <input type="text" id="referLink" class="form-control" readonly style="margin-bottom: 10px;">
+            <button class="btn" onclick="copyReferLink()"><i class="fas fa-copy"></i> লিংক কপি করুন</button>
+        </div>
+    </div>
 
-        window.addEventListener('DOMContentLoaded', async () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const refParam = urlParams.get('ref');
-            if(refParam) {
-                document.getElementById("regReferral").value = refParam;
-                switchAuthTab('reg');
-            }
+</div>
 
-            let savedPhone = localStorage.getItem('rsn_user_phone');
-            if(savedPhone) {
-                let doc = await db.collection("users").doc(savedPhone).get();
-                if(doc.exists && !doc.data().isBanned) {
-                    currentUser = doc.data();
-                    initSession();
-                } else {
-                    localStorage.removeItem('rsn_user_phone');
-                }
-            }
-            listenToAdminNotifications();
-        });
+<script>
+    // --- TELEGRAM BOT CONFIGURATION ---
+    const TELEGRAM_BOT_TOKEN = "YOUR_BOT_TOKEN_HERE"; // আপনার টেলিগ্রাম বটের টোকেন বসান
+    const TELEGRAM_CHAT_ID = "YOUR_CHAT_ID_HERE";     // আপনার টেলিগ্রাম চ্যাট আইডি বসান
 
-        function listenToAdminNotifications() {
-            db.collection("settings").doc("global_notification").onSnapshot(doc => {
-                if(doc.exists) {
-                    let data = doc.data();
-                    if(data.text) {
-                        document.getElementById("marqueeNoticeBar").innerText = "📢 " + data.text;
-                        
-                        if(data.id && data.id !== lastSeenNoticeId) {
-                            lastSeenNoticeId = data.id;
-                            document.getElementById("noticeModalText").innerText = data.text;
-                            document.getElementById("noticeModal").classList.remove("hidden");
-                        }
-                    }
-                }
-            });
+    // User Data Initialization
+    let winningBalance = parseFloat(localStorage.getItem('winningBalance')) || 0;
+    let referBalance = parseFloat(localStorage.getItem('referBalance')) || 0;
+    let totalRefers = parseInt(localStorage.getItem('totalRefers')) || 0;
+    let currentPlayers = 0;
+
+    // Load initial data
+    document.addEventListener("DOMContentLoaded", () => {
+        updateUI();
+        checkReferral();
+        
+        // Generate Personal Referral Link
+        const userCode = Math.floor(100000 + Math.random() * 900000);
+        const currentUrl = window.location.href.split('?')[0];
+        document.getElementById('referLink').value = `${currentUrl}?ref=${userCode}`;
+    });
+
+    function updateUI() {
+        document.getElementById('winningBalance').innerText = winningBalance;
+        document.getElementById('referBalance').innerText = referBalance;
+        document.getElementById('totalRefers').innerText = totalRefers;
+    }
+
+    // Auto Referral Cashback Bonus (+10 Taka)
+    function checkReferral() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('ref') && !localStorage.getItem('referred_before')) {
+            referBalance += 10;
+            totalRefers += 1;
+            localStorage.setItem('referBalance', referBalance);
+            localStorage.setItem('totalRefers', totalRefers);
+            localStorage.setItem('referred_before', 'true');
+            alert("অভিনন্দন! আপনি রেফারাল বোনাস ১০ টাকা পেয়েছেন।");
+            updateUI();
         }
+    }
 
-        function closeNoticeModal() {
-            document.getElementById("noticeModal").classList.add("hidden");
-        }
-
-        async function sendGlobalNotification() {
-            let msg = document.getElementById("adminNotificationText").value.trim();
-            if(!msg) return alert("মেসেজ লিখুন!");
-
-            await db.collection("settings").doc("global_notification").set({
-                text: msg,
-                id: Date.now().toString(),
-                time: new Date()
-            });
-
-            alert("সকল প্লেয়ারকে নোটিফিকেশন সফলভাবে পাঠানো হয়েছে!");
-            document.getElementById("adminNotificationText").value = "";
-        }
-
-        function switchAuthTab(tab) {
-            if(tab === 'login') {
-                document.getElementById("loginForm").classList.remove("hidden");
-                document.getElementById("regForm").classList.add("hidden");
-                document.getElementById("btnLoginTab").classList.add("active");
-                document.getElementById("btnRegTab").classList.remove("active");
+    // Match Joining & Telegram Notification Trigger
+    function joinMatch() {
+        if(currentPlayers < 2) {
+            currentPlayers++;
+            document.getElementById('playerCount').innerText = currentPlayers;
+            
+            if(currentPlayers === 2) {
+                alert("২ জন প্লেয়ার যুক্ত হয়েছে! এডমিন রুমে কোড জেনারেট হচ্ছে।");
+                sendTelegramNotification("🚨 অ্যালার্ট! ২ জন প্লেয়ার টুর্নামেন্টে যুক্ত হয়েছে। দ্রুত রুম কোড সেটআপ করুন!");
             } else {
-                document.getElementById("loginForm").classList.add("hidden");
-                document.getElementById("regForm").classList.remove("hidden");
-                document.getElementById("btnLoginTab").classList.remove("active");
-                document.getElementById("btnRegTab").classList.add("active");
+                alert("আপনি সফলভাবে ম্যাচে জয়েন করেছেন! দ্বিতীয় প্লেয়ারের জন্য অপেক্ষা করুন।");
             }
+        } else {
+            alert("ম্যাচটি ইতিমধ্যেই পূর্ণ হয়ে গেছে!");
         }
+    }
 
-        function switchPage(pId, nId) {
-            document.querySelectorAll(".section-page").forEach(p => p.classList.remove("active-page"));
-            document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
-            document.getElementById(pId).classList.add("active-page");
-            if(nId) document.getElementById(nId).classList.add("active");
-            if(pId === 'homePage') loadMatches();
-            if(pId === 'adminPage') loadAdminData();
+    // Send Notification to Admin Phone via Telegram Bot
+    function sendTelegramNotification(message) {
+        if(TELEGRAM_BOT_TOKEN === "YOUR_BOT_TOKEN_HERE") return;
+        
+        const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodeURIComponent(message)}`;
+        
+        fetch(url)
+        .then(res => res.json())
+        .then(data => console.log("Notification Sent"))
+        .catch(err => console.error(err));
+    }
+
+    // Navigation Switcher
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        
+        document.getElementById(tabId).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+
+    // Dynamic Withdraw Threshold Validation
+    function updateMinLimit() {
+        const type = document.getElementById('withdrawType').value;
+        const label = document.getElementById('minAmountLabel');
+        if(type === 'refer') {
+            label.innerText = "সর্বনিম্ন ৫০ টাকা";
+        } else {
+            label.innerText = "সর্বনিম্ন ২০০ টাকা";
         }
+    }
 
-        async function handleAuth(e, type) {
-            e.preventDefault();
-            if(type === 'reg') {
-                let name = document.getElementById("regName").value.trim();
-                let phone = document.getElementById("regPhone").value.trim();
-                let pass = document.getElementById("regPass").value.trim();
-                let refPhone = document.getElementById("regReferral").value.trim();
+    function handleWithdraw(event) {
+        event.preventDefault();
+        const type = document.getElementById('withdrawType').value;
+        const amount = parseFloat(document.getElementById('withdrawAmount').value);
 
-                let userDoc = await db.collection("users").doc(phone).get();
-                if(userDoc.exists) return alert("এই নম্বরে অ্যাকাউন্ট আছে!");
-
-                await db.collection("users").doc(phone).set({
-                    name, phone, pass, depositBalance: 0, winningBalance: 0, isBanned: false, referredBy: refPhone || null
-                });
-
-                if(refPhone && refPhone !== phone) {
-                    let refDoc = await db.collection("users").doc(refPhone).get();
-                    if(refDoc.exists) {
-                        let curDep = refDoc.data().depositBalance || 0;
-                        await db.collection("users").doc(refPhone).update({ depositBalance: curDep + 20 });
-                    }
-                }
-
-                alert("রেজিস্ট্রেশন সফল! এখন লগইন করুন।");
-                switchAuthTab('login');
-            } else {
-                let phone = document.getElementById("loginPhone").value.trim();
-                let pass = document.getElementById("loginPass").value.trim();
-
-                let userDoc = await db.collection("users").doc(phone).get();
-                if(!userDoc.exists || userDoc.data().pass !== pass) return alert("ভুল নম্বর বা পাসওয়ার্ড!");
-                if(userDoc.data().isBanned) return alert("আপনার অ্যাকাউন্টটি ব্যান করা হয়েছে!");
-
-                currentUser = userDoc.data();
-                localStorage.setItem('rsn_user_phone', currentUser.phone);
-                initSession();
+        if (type === 'refer') {
+            if (amount < 50) {
+                alert("রেফার ব্যালেন্স উত্তোলনের জন্য সর্বনিম্ন ৫০ টাকা হতে হবে।");
+                return;
             }
-        }
-
-        function initSession() {
-            document.getElementById("authSection").classList.add("hidden");
-            document.getElementById("appSection").classList.remove("hidden");
-
-            if(currentUser.phone === ADMIN_PHONE) {
-                document.getElementById("navAdmin").classList.remove("hidden");
-            } else {
-                document.getElementById("navAdmin").classList.add("hidden");
+            if (amount > referBalance) {
+                alert("আপনার রেফার ব্যালেন্সে পর্যাপ্ত টাকা নেই!");
+                return;
             }
-
-            db.collection("users").doc(currentUser.phone).onSnapshot(doc => {
-                if(doc.exists) {
-                    currentUser = doc.data();
-                    let total = (currentUser.depositBalance||0) + (currentUser.winningBalance||0);
-                    document.getElementById("currentBalance").innerText = total;
-                    document.getElementById("depBalanceDisplay").innerText = currentUser.depositBalance||0;
-                    document.getElementById("winBalanceDisplay").innerText = currentUser.winningBalance||0;
-                    document.getElementById("userNameDisplay").innerText = currentUser.name;
-                    
-                    document.getElementById("profNameDisplay").innerText = currentUser.name;
-                    document.getElementById("profPhoneDisplay").innerText = currentUser.phone;
-                    document.getElementById("avatarInitial").innerText = currentUser.name ? currentUser.name.charAt(0).toUpperCase() : "U";
-
-                    let baseUrl = window.location.href.split('?')[0];
-                    let myRefLink = `${baseUrl}?ref=${currentUser.phone}`;
-                    document.getElementById("referralLinkInput").value = myRefLink;
-                }
-            });
-            loadMatches();
-        }
-
-        function copyReferralLink() {
-            let refInput = document.getElementById("referralLinkInput");
-            refInput.select();
-            refInput.setSelectionRange(0, 99999);
-            navigator.clipboard.writeText(refInput.value);
-            alert("রেফার লিংক কপি হয়েছে!");
-        }
-
-        function handleLogout() {
-            if(confirm("আপনি কি নিশ্চিত যে অ্যাকাউন্ট লগআউট করতে চান?")) {
-                localStorage.removeItem('rsn_user_phone');
-                currentUser = null;
-                location.reload();
+            referBalance -= amount;
+            localStorage.setItem('referBalance', referBalance);
+        } else {
+            if (amount < 200) {
+                alert("উইনিং ব্যালেন্স উত্তোলনের জন্য সর্বনিম্ন ২০০ টাকা হতে হবে।");
+                return;
             }
-        }
-
-        function loadMatches() {
-            db.collection("matches").onSnapshot(snap => {
-                let joinedList = [];
-                let otherList = [];
-
-                snap.forEach(doc => {
-                    let m = doc.data();
-                    m.id = doc.id.replace("match_", "");
-                    let isJoined = m.joinedPlayers && m.joinedPlayers.includes(currentUser.phone);
-
-                    if (isJoined) joinedList.push(m);
-                    else otherList.push(m);
-                });
-
-                let sortedMatches = [...joinedList, ...otherList];
-                let html = "";
-
-                sortedMatches.forEach(m => {
-                    let joined = m.joinedPlayers ? m.joinedPlayers.length : 0;
-                    let isJoined = m.joinedPlayers && m.joinedPlayers.includes(currentUser.phone);
-
-                    html += `
-                        <div class="card ${isJoined ? 'joined-highlight' : ''}">
-                            ${isJoined ? '<span class="joined-badge">✅ আপনার কাস্টম ম্যাচ</span>' : ''}
-                            <h4>${m.title} (#${m.id})</h4>
-                            <p style="font-size:12px; color:var(--text-muted); margin: 6px 0;">এন্ট্রি ফি: ৳${m.entryFee} | প্রাইজ: ৳${m.prize} | প্লেয়ার: ${joined}/২</p>
-                            ${isJoined 
-                                ? `<button class="btn btn-green" onclick="goToGameArena('${m.id}')">গেম রুমে প্রবেশ করুন 🎮</button>`
-                                : `<button class="btn btn-blue" onclick="joinMatch('${m.id}', ${m.entryFee})">জয়েন করুন ৳${m.entryFee}</button>`
-                            }
-                        </div>
-                    `;
-                });
-
-                document.getElementById("matchContainer").innerHTML = html || "<p style='text-align:center;'>কোনো ম্যাচ পাওয়া যায়নি</p>";
-            });
-        }
-
-        async function joinMatch(mId, fee) {
-            let total = (currentUser.depositBalance||0) + (currentUser.winningBalance||0);
-            if(total < fee) return alert("পর্যাপ্ত ব্যালেন্স নেই! দয়া করে ডিপোজিট করুন।");
-
-            if(confirm("ম্যাচে জয়েন করতে চান?")) {
-                let dep = currentUser.depositBalance || 0;
-                let win = currentUser.winningBalance || 0;
-                if(dep >= fee) { dep -= fee; } else { win -= (fee - dep); dep = 0; }
-
-                await db.collection("users").doc(currentUser.phone).update({ depositBalance: dep, winningBalance: win });
-                await db.collection("matches").doc("match_" + mId).update({
-                    joinedPlayers: firebase.firestore.FieldValue.arrayUnion(currentUser.phone)
-                });
-                goToGameArena(mId);
+            if (amount > winningBalance) {
+                alert("আপনার উইনিং ব্যালেন্সে পর্যাপ্ত টাকা নেই!");
+                return;
             }
+            winningBalance -= amount;
+            localStorage.setItem('winningBalance', winningBalance);
         }
 
-        function goToGameArena(mId) {
-            currentActiveMatchId = mId;
-            document.getElementById("winMatchIdInput").value = mId;
-            hasNotified = false;
-            switchPage('gameArenaPage', 'navGame');
-            document.getElementById("gameMatchTitle").innerText = "লুডু ম্যাচ #" + mId;
-            listenToMatch(mId);
-        }
+        updateUI();
+        alert("উইথড্র রিকোয়েস্ট সফলভাবে জমা হয়েছে!");
+    }
 
-        function listenToMatch(mId) {
-            if(matchUnsub) matchUnsub();
+    // Copy Referral Link Function
+    function copyReferLink() {
+        const copyText = document.getElementById("referLink");
+        copyText.select();
+        document.execCommand("copy");
+        alert("রেফারেল লিংক কপি করা হয়েছে: " + copyText.value);
+    }
+</script>
 
-            matchUnsub = db.collection("matches").doc("match_" + mId).onSnapshot(async doc => {
-                let m = doc.data();
-                if(!m) {
-                    document.getElementById("matchSubtitle").innerText = "এই ম্যাচটি সমাপ্ত বা আর কার্যকর নেই।";
-                    document.getElementById("roomCodeSection").classList.add("hidden");
-                    return;
-                }
-
-                activeMatchData = m;
-                let joined = m.joinedPlayers || [];
-
-                if(joined.length === 2) {
-                    if(m.roomCode) {
-                        document.getElementById("matchSubtitle").innerText = "২ জন প্লেয়ার যুক্ত হয়েছেন! অফিশিয়াল রুম কোড নিচে দেওয়া হলো।";
-                        document.getElementById("roomCodeSection").classList.remove("hidden");
-                        document.getElementById("roomCodeVal").innerText = m.roomCode;
-
-                        if(!hasNotified) {
-                            hasNotified = true;
-                            alert(`🔔 অ্যাডমিন রুম কোড দিয়েছেন!\nকোড: ${m.roomCode}\nকপি করে লুডু কিং-এ ঢুকুন।`);
-                        }
-                    } else {
-                        document.getElementById("matchSubtitle").innerText = "২ জন প্লেয়ার পূর্ণ হয়েছে! অ্যাডমিন কিছুক্ষণের মধ্যে রুম কোড দেবেন...";
-                        document.getElementById("roomCodeSection").classList.add("hidden");
-                    }
-                } else {
-                    document.getElementById("matchSubtitle").innerText = "অপোনেন্ট প্লেয়ারের জন্য অপেক্ষা করা হচ্ছে...";
-                    document.getElementById("roomCodeSection").classList.add("hidden");
-                }
-            });
-        }
-
-        function copyRoomCode() {
-            let code = document.getElementById("roomCodeVal").innerText;
-            if(!code || code === "--------") return alert("রুম কোড এখনো প্রদেয় হয়নি!");
-
-            navigator.clipboard.writeText(code);
-            alert("রুম কোড কপি হয়েছে: " + code);
-        }
-
-        async function submitWinNotice() {
-            let mId = document.getElementById("winMatchIdInput").value.trim();
-            if(!mId) return alert("ম্যাচ নম্বর বা আইডি লিখুন!");
-
-            let matchDoc = await db.collection("matches").doc("match_" + mId).get();
-            if(!matchDoc.exists) return alert("এই ম্যাচ আইডিটি পাওয়া যায়নি! সঠিক ম্যাচ নম্বর দিন।");
-
-            let mData = matchDoc.data();
-
-            await db.collection("win_claims").add({
-                matchId: mId,
-                matchTitle: mData.title || ("Match #" + mId),
-                prize: mData.prize || 0,
-                playerPhone: currentUser.phone,
-                playerName: currentUser.name,
-                status: "pending",
-                time: new Date()
-            });
-
-            alert(`মেসেজ সফলভাবে পাঠানো হয়েছে!\nঅ্যাডমিন ম্যাচ আইডি #${mId} চেক করে ভেরিফাই করলেই আপনার অ্যাকাউন্টে প্রাইজ মানি ৳${mData.prize} জমা হয়ে যাবে।`);
-            document.getElementById("winMatchIdInput").value = "";
-        }
-
-        async function submitDeposit() {
-            let amount = Number(document.getElementById("depAmount").value);
-            let method = document.getElementById("depMethod").value;
-            let trx = document.getElementById("depTrx").value.trim();
-
-            if(!amount || !trx) return alert("সবগুলো তথ্য সঠিকভাবে পূরণ করুন!");
-
-            await db.collection("deposits").add({
-                phone: currentUser.phone, name: currentUser.name, amount, method, trx, status: "pending", time: new Date()
-            });
-            alert("ডিপোজিট রিকোয়েস্ট সফলভাবে পাঠানো হয়েছে!");
-            document.getElementById("depAmount").value = "";
-            document.getElementById("depTrx").value = "";
-        }
-
-        async function submitWithdraw() {
-            let amount = Number(document.getElementById("withAmount").value);
-            let method = document.getElementById("withMethod").value;
-            let phone = document.getElementById("withNumber").value.trim();
-
-            if(!amount || !phone) return alert("সব তথ্য দিন!");
-            if(amount < 200) return alert("⚠️ আপনি সর্বনিম্ন ২০০ টাকা উত্তোলন করতে পারবেন!");
-
-            if((currentUser.winningBalance||0) < amount) return alert("উইনিং ব্যালেন্স অপর্যাপ্ত!");
-
-            await db.collection("users").doc(currentUser.phone).update({
-                winningBalance: currentUser.winningBalance - amount
-            });
-
-            await db.collection("withdraws").add({
-                phone: currentUser.phone, name: currentUser.name, amount, method, targetPhone: phone, status: "pending", time: new Date()
-            });
-            alert("উইথড্র রিকোয়েস্ট সফল হয়েছে!");
-        }
-
-        async function transferBalance() {
-            let amount = Number(document.getElementById("trAmount").value);
-            if(!amount || (currentUser.winningBalance||0) < amount) return alert("সঠিক পরিমাণ লিখুন!");
-
-            await db.collection("users").doc(currentUser.phone).update({
-                winningBalance: currentUser.winningBalance - amount,
-                depositBalance: (currentUser.depositBalance||0) + amount
-            });
-            alert("ব্যালেন্স ট্রান্সফার সফল হয়েছে!");
-        }
-
-        async function createMatchByAdmin() {
-            let title = document.getElementById("adminMatchTitle").value.trim();
-            let entryFee = Number(document.getElementById("adminEntryFee").value);
-            let prize = Number(document.getElementById("adminPrize").value);
-
-            if(!title || !entryFee || !prize) return alert("সব ফিল্ড পূরণ করুন!");
-
-            let mId = Date.now().toString().slice(-4);
-            await db.collection("matches").doc("match_" + mId).set({
-                title, entryFee, prize, joinedPlayers: []
-            });
-            alert("নতুন ম্যাচ তৈরি হয়েছে!");
-        }
-
-        function loadAdminData() {
-            // 🎲 অ্যাডমিনের জন্য রুম কোড দেওয়ার সেকশন
-            db.collection("matches").onSnapshot(snap => {
-                let html = "";
-                snap.forEach(doc => {
-                    let m = doc.data();
-                    let mId = doc.id.replace("match_", "");
-                    let joined = m.joinedPlayers || [];
-
-                    if(joined.length === 2) {
-                        html += `
-                            <div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; margin-bottom:10px; border:1px solid var(--accent-orange);">
-                                <strong>ম্যাচ #${mId} (${m.title})</strong><br>
-                                <small>প্লেয়ার ১: ${joined[0]} | প্লেয়ার ২: ${joined[1]}</small><br>
-                                <span style="color:#facc15; font-size:11px;">বর্তমান কোড: ${m.roomCode || 'দেওয়া হয়নি'}</span>
-                                <div style="display:flex; gap:5px; margin-top:8px;">
-                                    <input type="text" id="adminCodeInput_${mId}" placeholder="লুডু রুম কোড লিখুন" style="padding:6px; font-size:12px;">
-                                    <button class="btn btn-green" style="padding:6px 12px; font-size:11px; margin-bottom:0; width:auto;" onclick="submitCodeByAdmin('${mId}')">সেভ</button>
-                                </div>
-                            </div>
-                        `;
-                    }
-                });
-                document.getElementById("adminRoomCodeContainer").innerHTML = html || "<p style='font-size:11px; color:var(--text-muted);'>বর্তমানে কোনো ম্যাচে ২ জন প্লেয়ার ফুল নেই</p>";
-            });
-
-            db.collection("win_claims").where("status", "==", "pending").onSnapshot(snap => {
-                let html = "";
-                snap.forEach(doc => {
-                    let w = doc.data();
-                    html += `
-                        <div style="margin-bottom:8px; padding:8px; background:rgba(0,0,0,0.2); border-radius:8px;">
-                            <strong>${w.playerName}</strong> (${w.playerPhone})<br>
-                            ম্যাচ আইডি: <strong>#${w.matchId}</strong> (${w.matchTitle})<br>
-                            প্রাইজ মানি: <strong style="color:var(--accent-green)">৳${w.prize}</strong><br>
-                            <button class="btn btn-green" style="padding:4px 8px; font-size:10px; margin-top:5px;" onclick="approveWinnerClaim('${doc.id}', '${w.playerPhone}', ${w.prize}, '${w.matchId}')">✅ জয়ী হিসেবে এপ্রুভ করুন</button>
-                        </div>
-                        <hr style="border-color:var(--border-card); margin:8px 0;">
-                    `;
-                });
-                document.getElementById("winNoticeContainer").innerHTML = html || "কোনো পেন্ডিং উইন রিকোয়েস্ট নেই";
-            });
-
-            db.collection("deposits").where("status", "==", "pending").onSnapshot(snap => {
-                let html = "";
-                snap.forEach(doc => {
-                    let d = doc.data();
-                    html += `<div style="margin-bottom:8px;">${d.name} (${d.phone}) - ৳${d.amount} [${d.method}] Trx: ${d.trx} 
-                    <button class="btn btn-green" style="padding:4px 8px; font-size:10px; display:inline-block; width:auto;" onclick="approveDep('${doc.id}', '${d.phone}', ${d.amount})">এপ্রুভ</button></div><hr style="border-color:var(--border-card); margin:8px 0;">`;
-                });
-                document.getElementById("depRequestContainer").innerHTML = html || "পেন্ডিং ডিপোজিট নেই";
-            });
-
-            db.collection("withdraws").where("status", "==", "pending").onSnapshot(snap => {
-                let html = "";
-                snap.forEach(doc => {
-                    let w = doc.data();
-                    html += `<div style="margin-bottom:8px;">${w.name} (${w.phone}) - ৳${w.amount} to ${w.targetPhone} [${w.method}] 
-                    <button class="btn btn-orange" style="padding:4px 8px; font-size:10px; display:inline-block; width:auto;" onclick="approveWith('${doc.id}')">পেইড</button></div><hr style="border-color:var(--border-card); margin:8px 0;">`;
-                });
-                document.getElementById("withRequestContainer").innerHTML = html || "পেন্ডিং উইথড্র নেই";
-            });
-
-            db.collection("users").onSnapshot(snap => {
-                let html = "";
-                snap.forEach(doc => {
-                    let u = doc.data();
-                    if(u.phone === ADMIN_PHONE) return;
-
-                    html += `
-                        <div class="user-item">
-                            <div><strong>${u.name}</strong> (${u.phone})</div>
-                            <div style="color:var(--text-muted); font-size:11px;">ডিপোজিট: ৳${u.depositBalance||0} | উইনিং: ৳${u.winningBalance||0}</div>
-                            <div style="color:${u.isBanned ? 'var(--accent-red)' : 'var(--accent-green)'}; font-size:11px; font-weight:bold;">স্ট্যাটাস: ${u.isBanned ? 'ব্যানড' : 'অ্যাক্টিভ'}</div>
-                            <div class="user-actions">
-                                <button class="btn btn-green" onclick="adjustUserBalance('${u.phone}', 'add')">+ ব্যালেন্স</button>
-                                <button class="btn btn-orange" onclick="adjustUserBalance('${u.phone}', 'cut')">- ব্যালেন্স</button>
-                                <button class="btn btn-red" onclick="toggleUserBan('${u.phone}', ${u.isBanned})">${u.isBanned ? 'আনব্যান' : 'ব্যান'}</button>
-                            </div>
-                        </div>
-                    `;
-                });
-                document.getElementById("userManageContainer").innerHTML = html || "কোনো ইউজার নেই";
-            });
-        }
-
-        async function submitCodeByAdmin(mId) {
-            let code = document.getElementById("adminCodeInput_" + mId).value.trim();
-            if(!code) return alert("রুম কোড লিখুন!");
-
-            await db.collection("matches").doc("match_" + mId).update({ roomCode: code });
-            alert("রুম কোড সফলভাবে যুক্ত করা হয়েছে! প্লেয়াররা এটি পেয়ে যাবে।");
-        }
-
-        async function approveWinnerClaim(claimId, phone, prize, matchId) {
-            if(confirm(`আপনি কি নিশ্চিত যে এই প্লেয়ারকে বিজয়ী হিসেবে ৳${prize} প্রদান করতে চান?`)) {
-                let uDoc = await db.collection("users").doc(phone).get();
-                if(uDoc.exists) {
-                    let curWin = uDoc.data().winningBalance || 0;
-                    await db.collection("users").doc(phone).update({ winningBalance: curWin + prize });
-                    await db.collection("win_claims").doc(claimId).update({ status: "approved" });
-                    
-                    await db.collection("matches").doc("match_" + matchId).delete();
-
-                    alert(`সাফল্যের সাথে ৳${prize} প্লেয়ারের ওয়ালেটে যোগ করা হয়েছে এবং ম্যাচটি সমাপ্ত করা হয়েছে!`);
-                }
-            }
-        }
-
-        async function approveDep(reqId, phone, amount) {
-            let uDoc = await db.collection("users").doc(phone).get();
-            if(uDoc.exists) {
-                let curDep = uDoc.data().depositBalance || 0;
-                await db.collection("users").doc(phone).update({ depositBalance: curDep + amount });
-                await db.collection("deposits").doc(reqId).update({ status: "approved" });
-                alert("ডিপোজিট এপ্রুভ হয়েছে!");
-            }
-        }
-
-        async function approveWith(reqId) {
-            await db.collection("withdraws").doc(reqId).update({ status: "completed" });
-            alert("উইথড্র পেইড হিসেবে মার্ক করা হয়েছে!");
-        }
-
-        async function adjustUserBalance(phone, action) {
-            let amt = Number(prompt(action === 'add' ? "কত টাকা যোগ করতে চান?" : "কত টাকা কাটতে চান?"));
-            if(!amt || amt <= 0) return;
-
-            let uDoc = await db.collection("users").doc(phone).get();
-            if(uDoc.exists) {
-                let curDep = uDoc.data().depositBalance || 0;
-                let newBal = action === 'add' ? (curDep + amt) : Math.max(0, curDep - amt);
-                await db.collection("users").doc(phone).update({ depositBalance: newBal });
-                alert("ব্যালেন্স আপডেট সফল হয়েছে!");
-            }
-        }
-
-        async function toggleUserBan(phone, isBanned) {
-            if(confirm(isBanned ? "ইউজারকে আনব্যান করতে চান?" : "ইউজারকে ব্যান করতে চান?")) {
-                await db.collection("users").doc(phone).update({ isBanned: !isBanned });
-                alert("ইউজার স্ট্যাটাস পরিবর্তন হয়েছে!");
-            }
-        }
-    </script>
 </body>
-</html>
+    </html>
